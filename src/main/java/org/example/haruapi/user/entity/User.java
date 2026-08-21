@@ -8,6 +8,8 @@ import org.example.haruapi.global.entity.BaseEntity;
 
 import java.time.LocalDateTime;
 
+
+
 @Getter
 @Entity
 @Table(name = "users")
@@ -28,6 +30,7 @@ public class User extends BaseEntity {
     private String password;
 
     @Column(nullable = false, length = 20)
+
     private String nickname;
 
     @Column(name = "deleted_at")
@@ -40,6 +43,9 @@ public class User extends BaseEntity {
         this.deletedAt = deletedAt;
 
     }
+
+    // 추후 수정 예정
+
 
 
 
