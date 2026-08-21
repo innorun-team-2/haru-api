@@ -38,4 +38,10 @@ public class Comment extends BaseEntity {
     private User user;
 
     private LocalDateTime deletedAt;
+
+    public Comment(Post post, String content, User user) {
+        this.post = post;
+        this.content = content;
+        this.user = user;
+    }
 }
