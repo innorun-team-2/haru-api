@@ -3,7 +3,7 @@
 -
 
 ## 🔗 관련 이슈 (Related Issues)
-Closes #
+Closes #12
 
 ## ✅ 체크리스트 (Checklist)
 - [ ] 브랜치 이름 규칙을 준수했나요? (예: feat/login)
