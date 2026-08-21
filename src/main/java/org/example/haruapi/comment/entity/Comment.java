@@ -30,6 +30,7 @@ public class Comment extends BaseEntity {
 
     @NotBlank(message = "내용은 필수입니다.")
     @Size(max = 50, message = "내용은 50자 이내로 입력해주세요.")
+    @Column(nullable = false, length = 50)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
