@@ -33,7 +33,7 @@ public class User extends BaseEntity {
 
     private String nickname;
 
-    @Column(name = "deletedAt")
+    @Column(nullable = true)
     private LocalDateTime deletedAt;
 
     private User(String email, String password, String nickname, LocalDateTime deletedAt) {
