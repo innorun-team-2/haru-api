@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class CommentNotFoundException extends ServiceException {
     public CommentNotFoundException(String message) {
-        super(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", message); // HttpStatus.NOT_FOUND 지정
+        super(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", message);
     }
 }
