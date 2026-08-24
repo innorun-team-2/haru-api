@@ -1,5 +1,6 @@
 package org.example.haruapi.global.s3.service;
 
+import io.awspring.cloud.s3.S3Exception;
 import io.awspring.cloud.s3.S3Template;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +29,7 @@ public class S3Service {
             s3Template.upload(bucket, key, file.getInputStream());
             return key;
         } catch (IOException e) {
-            // 적절한 커스텀 예외로 바꾸고, GlobalExceptionHandler로 핸들링 필요
-            throw new RuntimeException("파일 업로드 실패", e);
+            throw new S3Exception("파일 업로드를 실패하였습니다.", e);
         }
     }
 

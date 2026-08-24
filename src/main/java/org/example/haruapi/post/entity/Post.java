@@ -2,6 +2,7 @@ package org.example.haruapi.post.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.haruapi.global.entity.BaseEntity;
@@ -25,9 +26,19 @@ public class Post extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id")
+//    private User user;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     private LocalDateTime deletedAt;
+
+    @Builder
+    private Post(String title, String content, Long userId) {
+        this.title = title;
+        this.content = content;
+        this.userId = userId;
+    }
 }
