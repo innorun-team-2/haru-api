@@ -25,7 +25,7 @@ public class CommentService {
     @Transactional
     public List<CommentCreateResponse> save(Long userId, Long postId, CommentCreateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException("존재하지 않는 사용자입니다.")
+                () -> new IllegalStateException("존재하지 않는 사용자입니다.")
         );
 
         Post post = postRepository.findById(postId).orElseThrow(
