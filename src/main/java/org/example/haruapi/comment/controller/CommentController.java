@@ -7,6 +7,7 @@ import org.example.haruapi.comment.service.CommentService;
 import org.example.haruapi.global.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,14 +21,14 @@ public class CommentController {
 
     @PostMapping("/api/posts/{postId}/comments")
     public ResponseEntity<ApiResponse<CommentCreateResponse>> save(
-            @AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long postId,
             @RequestBody CommentCreateRequest request
     ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         commentService.save(
-                                authUser,
+                                jwt,
                                 postId,
                                 request)));
     }
