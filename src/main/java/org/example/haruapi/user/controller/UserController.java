@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +43,14 @@ public class UserController {
             @Valid @RequestBody UserUpdateRequest request
     ) {
         userService.update(Long.valueOf(jwt.getSubject()), request);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> withdraw(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        userService.withdraw(Long.valueOf(jwt.getSubject()));
         return ResponseEntity.ok(ApiResponse.success());
     }
 }
