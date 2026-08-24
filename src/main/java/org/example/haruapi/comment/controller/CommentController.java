@@ -2,6 +2,8 @@ package org.example.haruapi.comment.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.haruapi.comment.dto.CommentGetResponse;
+import org.example.haruapi.comment.dto.CommentCreateRequest;
+import org.example.haruapi.comment.dto.CommentCreateResponse;
 import org.example.haruapi.comment.service.CommentService;
 import org.example.haruapi.global.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;

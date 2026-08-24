@@ -2,6 +2,7 @@ package org.example.haruapi.post.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.haruapi.global.entity.BaseEntity;
@@ -30,4 +31,11 @@ public class Post extends BaseEntity {
     private User user;
 
     private LocalDateTime deletedAt;
+
+    @Builder
+    private Post(String title, String content, User user) {
+        this.title = title;
+        this.content = content;
+        this.user = user;
+    }
 }

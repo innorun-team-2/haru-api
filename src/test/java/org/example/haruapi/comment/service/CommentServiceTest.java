@@ -2,8 +2,10 @@ package org.example.haruapi.comment.service;
 
 import org.example.haruapi.comment.dto.CommentGetResponse;
 import org.example.haruapi.comment.entity.Comment;
-import org.example.haruapi.comment.repository.CommentRepository;
 import org.example.haruapi.user.entity.User;
+import org.example.haruapi.comment.dto.CommentCreateRequest;
+import org.example.haruapi.comment.dto.CommentCreateResponse;
+import org.example.haruapi.comment.repository.CommentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
