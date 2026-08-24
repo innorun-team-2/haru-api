@@ -180,4 +180,28 @@ class CommentServiceTest {
         verify(commentRepository).findById(commentId);
         verify(comment).update("수정된 댓글입니다.");
     }
+
+    @Test
+    void 댓글_삭제_성공() {
+        // given
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("sub", "1")
+                .build();
+
+        User user = mock(User.class);
+        given(user.getId()).willReturn(1L);
+
+        Comment comment = mock(Comment.class);
+        given(comment.getUser()).willReturn(user);
+
+        given(commentRepository.findById(1L))
+                .willReturn(Optional.of(comment));
+
+        // when
+        commentService.delete(jwt, 1L, 1L);
+
+        // then
+        verify(comment).updateDeletedAt();
+    }
 }
