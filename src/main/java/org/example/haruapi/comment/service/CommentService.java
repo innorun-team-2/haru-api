@@ -1,6 +1,7 @@
 package org.example.haruapi.comment.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.haruapi.comment.dto.CommentGetResponse;
 import org.example.haruapi.comment.dto.CommentCreateRequest;
 import org.example.haruapi.comment.dto.CommentCreateResponse;
 import org.example.haruapi.comment.entity.Comment;
@@ -49,5 +50,25 @@ public class CommentService {
                 comment.getUpdatedAt(),
                 comment.getDeletedAt()
         ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentGetResponse> getAll(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 포스트입니다.")
+        );
+
+        List<Comment> comments = commentRepository.findByPostIdAndDeletedAtIsNull(postId);
+
+        return comments.stream().map(
+                comment -> new CommentGetResponse(
+                        comment.getId(),
+                        comment.getContent(),
+                        comment.getUser().getId(),
+                        comment.getUser().getNickname(),
+                        comment.getCreatedAt(),
+                        comment.getUpdatedAt()
+                )
+        ).toList();
     }
 }

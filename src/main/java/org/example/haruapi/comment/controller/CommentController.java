@@ -1,6 +1,7 @@
 package org.example.haruapi.comment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.haruapi.comment.dto.CommentGetResponse;
 import org.example.haruapi.comment.dto.CommentCreateRequest;
 import org.example.haruapi.comment.dto.CommentCreateResponse;
 import org.example.haruapi.comment.service.CommentService;
@@ -31,5 +32,14 @@ public class CommentController {
                                 userId,
                                 postId,
                                 request)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<CommentGetResponse>> getAll(
+            @PathVariable Long postId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        commentService.getAll(postId)));
     }
 }
