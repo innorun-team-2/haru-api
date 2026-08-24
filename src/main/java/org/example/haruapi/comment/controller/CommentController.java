@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.haruapi.comment.dto.CommentCreateRequest;
 import org.example.haruapi.comment.dto.CommentCreateResponse;
 import org.example.haruapi.comment.service.CommentService;
+import org.example.haruapi.global.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,10 +19,16 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/api/posts/{postId}/comments")
-    public ResponseEntity<CommentCreateResponse> save(
+    public ResponseEntity<ApiResponse<CommentCreateResponse>> save(
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long postId,
             @RequestBody CommentCreateRequest request
     ) {
-        return ResponseEntity.ok();
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        commentService.save(
+                                authUser.getId(),
+                                postId,
+                                request)));
     }
 }
