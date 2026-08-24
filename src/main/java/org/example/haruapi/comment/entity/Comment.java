@@ -38,4 +38,8 @@ public class Comment extends BaseEntity {
     private User user;
 
     private LocalDateTime deletedAt;
+
+    public void updateDeletedAt() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }
