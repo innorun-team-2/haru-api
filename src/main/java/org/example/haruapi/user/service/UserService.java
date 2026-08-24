@@ -70,6 +70,13 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void withdraw(Long userId) {
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(UserNotFoundException::new);
+        user.withdraw();
+    }
+
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
     }
