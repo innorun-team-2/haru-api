@@ -25,10 +25,12 @@ public class CommentController {
             @PathVariable Long postId,
             @RequestBody CommentCreateRequest request
     ) {
+        Long userId = Long.valueOf(jwt.getSubject());
+
         return ResponseEntity.ok(
                 ApiResponse.success(
                         commentService.save(
-                                jwt,
+                                userId,
                                 postId,
                                 request)));
     }

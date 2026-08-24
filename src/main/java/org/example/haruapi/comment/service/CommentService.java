@@ -9,7 +9,6 @@ import org.example.haruapi.post.entity.Post;
 import org.example.haruapi.post.repository.PostRepository;
 import org.example.haruapi.user.entity.User;
 import org.example.haruapi.user.repository.UserRepository;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +23,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public List<CommentCreateResponse> save(Jwt jwt, Long postId, CommentCreateRequest request) {
-        Long userId = Long.valueOf(jwt.getSubject());
+    public List<CommentCreateResponse> save(Long userId, Long postId, CommentCreateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("존재하지 않는 사용자입니다.")
         );
