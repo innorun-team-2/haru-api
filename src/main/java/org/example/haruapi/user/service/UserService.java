@@ -2,10 +2,12 @@ package org.example.haruapi.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.haruapi.user.dto.request.UserRegisterRequest;
+import org.example.haruapi.user.dto.request.UserUpdateRequest;
 import org.example.haruapi.user.dto.response.UserRegisterResponse;
 import org.example.haruapi.user.entity.User;
 import org.example.haruapi.user.exception.DuplicateEmailException;
 import org.example.haruapi.user.exception.DuplicateNicknameException;
+import org.example.haruapi.user.exception.UserNotFoundException;
 import org.example.haruapi.user.repository.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,6 +48,28 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void update(Long userId, UserUpdateRequest request) {
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (request.nickname() != null) {
+            String nickname = request.nickname().trim();
+            validateNicknameAvailableForUpdate(nickname, userId);
+            user.updateNickname(nickname);
+        }
+
+        if (request.password() != null) {
+            user.updatePassword(passwordEncoder.encode(request.password()));
+        }
+
+        try {
+            userRepository.flush();
+        } catch (DataIntegrityViolationException exception) {
+            throw new DuplicateNicknameException();
+        }
+    }
+
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
     }
@@ -58,6 +82,18 @@ public class UserService {
 
     private void validateNicknameAvailable(String nickname) {
         if (userRepository.existsByNicknameIgnoreCase(nickname)) {
+            throw new DuplicateNicknameException();
+        }
+    }
+
+    private void validateNicknameAvailableForUpdate(
+            String nickname,
+            Long userId
+    ) {
+        if (userRepository.existsByNicknameIgnoreCaseAndIdNot(
+                nickname,
+                userId
+        )) {
             throw new DuplicateNicknameException();
         }
     }
