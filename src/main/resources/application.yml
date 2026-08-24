@@ -12,6 +12,10 @@ spring:
       max-file-size: 10MB
       max-request-size: 20MB
 
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
 security:
   jwt:
     issuer: haru-api
