@@ -1,11 +1,10 @@
 package org.example.haruapi.comment.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.haruapi.comment.dto.CommentGetResponse;
-import org.example.haruapi.comment.dto.CommentCreateRequest;
-import org.example.haruapi.comment.dto.CommentCreateResponse;
-import org.example.haruapi.comment.dto.CommentUpdateResponse;
+import org.example.haruapi.comment.dto.*;
 import org.example.haruapi.comment.entity.Comment;
+import org.example.haruapi.comment.exception.CommentAccessDeniedException;
+import org.example.haruapi.comment.exception.CommentNotFoundException;
 import org.example.haruapi.comment.repository.CommentRepository;
 import org.example.haruapi.post.entity.Post;
 import org.example.haruapi.post.repository.PostRepository;
