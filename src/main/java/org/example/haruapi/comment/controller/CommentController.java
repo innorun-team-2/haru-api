@@ -42,4 +42,22 @@ public class CommentController {
                 ApiResponse.success(
                         commentService.getAll(postId)));
     }
+
+    @PutMapping("/{commentId}")
+    public ResponseEntity<ApiResponse<CommentUpdateResponse>> update(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @RequestBody CommentUpdateRequest request
+    ) {
+        Long userId = Long.valueOf(jwt.getSubject());
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        commentService.update(
+                                userId,
+                                postId,
+                                commentId,
+                                request)));
+    }
 }

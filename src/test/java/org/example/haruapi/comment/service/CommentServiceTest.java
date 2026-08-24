@@ -1,6 +1,8 @@
 package org.example.haruapi.comment.service;
 
 import org.example.haruapi.comment.dto.CommentGetResponse;
+import org.example.haruapi.comment.dto.CommentUpdateRequest;
+import org.example.haruapi.comment.dto.CommentUpdateResponse;
 import org.example.haruapi.comment.entity.Comment;
 import org.example.haruapi.user.entity.User;
 import org.example.haruapi.comment.dto.CommentCreateRequest;
@@ -14,10 +16,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
@@ -82,5 +86,45 @@ class CommentServiceTest {
 
         // then
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void 댓글_내용_수정_성공() {
+        // given
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("sub", "1")
+                .build();
+
+        CommentUpdateRequest request =
+                new CommentUpdateRequest("수정된 댓글입니다.");
+
+        User user = mock(User.class);
+        given(user.getId()).willReturn(1L);
+        given(user.getNickname()).willReturn("테스트유저");
+
+        Comment comment = mock(Comment.class);
+
+        given(comment.getId()).willReturn(1L);
+        given(comment.getContent()).willReturn("수정된 댓글입니다.");
+        given(comment.getUser()).willReturn(user);
+
+        given(commentRepository.findById(1L))
+                .willReturn(Optional.of(comment));
+
+        // when
+        List<CommentUpdateResponse> result =
+                commentService.update(jwt, 1L, 1L, request);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(1L);
+        assertThat(result.get(0).getContent())
+                .isEqualTo("수정된 댓글입니다.");
+        assertThat(result.get(0).getUserId()).isEqualTo(1L);
+        assertThat(result.get(0).getUserNickname())
+                .isEqualTo("테스트유저");
+
+        verify(comment).update("수정된 댓글입니다.");
     }
 }

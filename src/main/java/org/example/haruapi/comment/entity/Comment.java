@@ -26,7 +26,7 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
-    
+
     @NotBlank(message = "내용은 필수입니다.")
     @Size(max = 50, message = "내용은 50자 이내로 입력해주세요.")
     @Column(nullable = false, length = 50)
@@ -42,5 +42,9 @@ public class Comment extends BaseEntity {
         this.post = post;
         this.content = content;
         this.user = user;
+    }
+
+    public void update(String content) {
+        this.content = content;
     }
 }

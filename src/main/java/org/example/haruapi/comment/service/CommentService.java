@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.haruapi.comment.dto.CommentGetResponse;
 import org.example.haruapi.comment.dto.CommentCreateRequest;
 import org.example.haruapi.comment.dto.CommentCreateResponse;
+import org.example.haruapi.comment.dto.CommentUpdateResponse;
 import org.example.haruapi.comment.entity.Comment;
 import org.example.haruapi.comment.repository.CommentRepository;
 import org.example.haruapi.post.entity.Post;
@@ -70,5 +71,34 @@ public class CommentService {
                         comment.getUpdatedAt()
                 )
         ).toList();
+    }
+
+    @Transactional
+    public List<CommentUpdateResponse> update(Long userId, Long postId, Long commentId, CommentUpdateRequest request) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 포스트입니다.")
+        );
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new CommentNotFoundException("존재하지 않는 댓글입니다.")
+        );
+
+        // 작성자가 맞는지 확인
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentAccessDeniedException("수정 권한이 없습니다.");
+        }
+
+        comment.update(request.getContent());
+
+        return List.of(
+                new CommentUpdateResponse(
+                        comment.getId(),
+                        comment.getContent(),
+                        comment.getUser().getId(),
+                        comment.getUser().getNickname(),
+                        comment.getCreatedAt(),
+                        comment.getUpdatedAt()
+                )
+        );
     }
 }
