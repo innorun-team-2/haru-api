@@ -1,6 +1,8 @@
 package org.example.haruapi.global.security.jwt;
 
+import org.example.haruapi.global.security.jwt.revocation.JwtRevocationValidator;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
@@ -14,6 +16,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class JwtTokenProviderTest {
 
@@ -27,7 +32,11 @@ class JwtTokenProviderTest {
         JwtConfig config = new JwtConfig();
         var key = config.jwtSecretKey(properties);
         var encoder = config.jwtEncoder(key);
-        JwtDecoder decoder = config.jwtDecoder(key, properties);
+        JwtDecoder decoder = config.jwtDecoder(
+                key,
+                properties,
+                allowAllRevocationValidator()
+        );
         Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
         JwtTokenProvider provider = new JwtTokenProvider(encoder, properties, clock);
 
@@ -56,7 +65,11 @@ class JwtTokenProviderTest {
                 Clock.fixed(NOW, ZoneOffset.UTC)
         );
         String token = provider.issueAccessToken(1L, List.of("USER")).value();
-        JwtDecoder decoder = config.jwtDecoder(key, decoderProperties);
+        JwtDecoder decoder = config.jwtDecoder(
+                key,
+                decoderProperties,
+                allowAllRevocationValidator()
+        );
 
         assertThatThrownBy(() -> decoder.decode(token))
                 .isInstanceOf(JwtValidationException.class);
@@ -83,5 +96,12 @@ class JwtTokenProviderTest {
                 Duration.ofMinutes(15),
                 SECRET
         );
+    }
+
+    private JwtRevocationValidator allowAllRevocationValidator() {
+        JwtRevocationValidator validator = mock(JwtRevocationValidator.class);
+        when(validator.validate(any()))
+                .thenReturn(OAuth2TokenValidatorResult.success());
+        return validator;
     }
 }
