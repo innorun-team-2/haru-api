@@ -9,6 +9,8 @@ import org.example.haruapi.post.dto.PostCreateResponseDto;
 import org.example.haruapi.post.entity.Post;
 import org.example.haruapi.post.exception.ImageRequiredException;
 import org.example.haruapi.post.repository.PostRepository;
+import org.example.haruapi.user.entity.User;
+import org.example.haruapi.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -22,10 +24,13 @@ public class PostService {
     private final S3Service s3Service;
     private final ImageRepository imageRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     // 게시글 생성
     public PostCreateResponseDto create(Long userId, PostCreateRequestDto requestDto, MultipartFile image) {
-        // 유저 조회 검증 로직 (추후 작성)
+        // 유저 조회 검증 로직 (수정 예정)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 이미지가 비어있다면 예외 처리
         if (ObjectUtils.isEmpty(image)) {
@@ -36,7 +41,7 @@ public class PostService {
         Post post = Post.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .userId(userId)
+                .user(user)
                 .build();
         Post savePost = postRepository.save(post);
 

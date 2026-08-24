@@ -23,7 +23,7 @@ public class PostController {
     @PostMapping
     public ResponseEntity<ApiResponse<PostCreateResponseDto>> create(
 //             @AuthenticationPrincipal AuthUser authUser,
-            @RequestParam(name = "userId", defaultValue = "1") Long userId, // 임시 유저 id
+            @RequestParam(name = "userId") Long userId, // 임시 유저 id
             @RequestPart(value = "requestDto") @Valid PostCreateRequestDto requestDto,
             @RequestPart(value= "image") MultipartFile image
     ) {

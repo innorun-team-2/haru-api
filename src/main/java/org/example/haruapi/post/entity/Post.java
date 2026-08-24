@@ -26,19 +26,16 @@ public class Post extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String content;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-//    private User user;
-
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private LocalDateTime deletedAt;
 
     @Builder
-    private Post(String title, String content, Long userId) {
+    private Post(String title, String content, User user) {
         this.title = title;
         this.content = content;
-        this.userId = userId;
+        this.user = user;
     }
 }
