@@ -27,7 +27,7 @@ public class CommentController {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         commentService.save(
-                                authUser.getId(),
+                                authUser,
                                 postId,
                                 request)));
     }
