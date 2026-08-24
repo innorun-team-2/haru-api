@@ -2,10 +2,9 @@ package org.example.haruapi.post.service;
 
 import org.example.haruapi.image.entity.Image;
 import org.example.haruapi.image.repository.ImageRepository;
-import org.example.haruapi.post.dto.PostGetAllResponseDto;
-import org.example.haruapi.post.dto.PostGetDetailResponseDto;
-import org.example.haruapi.post.dto.PostGetMyResponseDto;
+import org.example.haruapi.post.dto.*;
 import org.example.haruapi.post.entity.Post;
+import org.example.haruapi.post.exception.PostForbiddenException;
 import org.example.haruapi.post.exception.PostNotFoundException;
 import org.example.haruapi.post.repository.PostRepository;
 import org.example.haruapi.user.entity.User;
@@ -21,6 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
@@ -140,5 +140,64 @@ class PostServiceTest {
         // then
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getNickname()).isEqualTo("작성자닉네임");
+    }
+
+    @Test
+    void 게시글_수정이_성공한다() {
+        //given
+        Long userId = 1L;
+        Long postId = 1L;
+
+        User mockUser = mock(User.class);
+        given(mockUser.getId()).willReturn(1L);
+
+        Post post = Post.builder()
+                .title("기존 제목")
+                .content("기존 내용")
+                .user(mockUser)
+                .build();
+
+        PostUpdateRequestDto request = PostUpdateRequestDto.builder()
+                .title("수정할 제목")
+                .content("수정할 내용")
+                .build();
+
+        given(postRepository.findByIdAndDeletedAtIsNull(postId)).willReturn(Optional.of(post));
+
+        //when
+        List<PostUpdateResponseDto> result = postService.update(userId, postId, request);
+
+        //then
+        assertThat(result).isNotNull();
+        assertThat(post.getTitle()).isEqualTo("수정할 제목");
+        assertThat(post.getContent()).isEqualTo("수정할 내용");
+    }
+
+    @Test
+    void 게시글_수정_권한이_없으면_예외가_발생한다() {
+        //given
+        Long requestUserId = 2L;
+        Long postId = 1L;
+
+        User ownerMock = mock(User.class);
+        given(ownerMock.getId()).willReturn(1L);
+
+        Post post = Post.builder()
+                .title("기존 제목")
+                .content("기존 내용")
+                .user(ownerMock) // 원작자 등록
+                .build();
+
+        PostUpdateRequestDto request = PostUpdateRequestDto.builder()
+                .title("수정할 제목")
+                .content("수정할 내용")
+                .build();
+
+        given(postRepository.findByIdAndDeletedAtIsNull(postId)).willReturn(Optional.of(post));
+
+        //then
+        assertThatThrownBy(() -> postService.update(requestUserId, postId, request))
+                .isInstanceOf(PostForbiddenException.class)
+                .hasMessage("게시글 수정 권한이 없습니다.");
     }
 }
