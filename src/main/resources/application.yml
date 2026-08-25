@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: haru-api
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+security:
+  jwt:
+    issuer: haru-api
+    audience: haru-client
+    access-token-ttl: 15m
+    secret-key: ${JWT_SECRET_BASE64}
