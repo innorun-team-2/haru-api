@@ -1,5 +1,6 @@
 package org.example.haruapi.comment.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.haruapi.comment.dto.*;
 import org.example.haruapi.comment.service.CommentService;
@@ -20,7 +21,7 @@ public class CommentController {
     public ResponseEntity<ApiResponse<CommentCreateResponse>> save(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long postId,
-            @RequestBody CommentCreateRequest request
+            @Valid @RequestBody CommentCreateRequest request
     ) {
         Long userId = Long.valueOf(jwt.getSubject());
 
@@ -46,7 +47,7 @@ public class CommentController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long postId,
             @PathVariable Long commentId,
-            @RequestBody CommentUpdateRequest request
+            @Valid @RequestBody CommentUpdateRequest request
     ) {
         Long userId = Long.valueOf(jwt.getSubject());
 
