@@ -6,7 +6,8 @@
 ## 📖 Table of Contents
 - [[1] About the Project](#1-about-the-project)
 - [[2] Technologies](#2-technologies)
-- [[3] Our Team](#3-our-team)
+- [[3] ERD](#3-erd)
+- [[4] Our Team](#4-our-team)
 
 <br>
 
