@@ -7,8 +7,10 @@ import org.example.haruapi.comment.exception.CommentAccessDeniedException;
 import org.example.haruapi.comment.exception.CommentNotFoundException;
 import org.example.haruapi.comment.repository.CommentRepository;
 import org.example.haruapi.post.entity.Post;
+import org.example.haruapi.post.exception.PostNotFoundException;
 import org.example.haruapi.post.repository.PostRepository;
 import org.example.haruapi.user.entity.User;
+import org.example.haruapi.user.exception.UserNotFoundException;
 import org.example.haruapi.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +28,11 @@ public class CommentService {
     @Transactional
     public List<CommentCreateResponse> save(Long userId, Long postId, CommentCreateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 사용자입니다.")
+                () -> new UserNotFoundException()
         );
 
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 포스트입니다.")
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
+                () -> new PostNotFoundException("존재하지 않는 포스트입니다.")
         );
 
         Comment comment = new Comment(
@@ -54,8 +56,8 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentGetResponse> getAll(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 포스트입니다.")
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
+                () -> new PostNotFoundException("존재하지 않는 포스트입니다.")
         );
 
         List<Comment> comments = commentRepository.findByPostIdAndDeletedAtIsNull(postId);
@@ -74,11 +76,11 @@ public class CommentService {
 
     @Transactional
     public List<CommentUpdateResponse> update(Long userId, Long postId, Long commentId, CommentUpdateRequest request) {
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 포스트입니다.")
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
+                () -> new PostNotFoundException("존재하지 않는 포스트입니다.")
         );
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
+        Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId).orElseThrow(
                 () -> new CommentNotFoundException("존재하지 않는 댓글입니다.")
         );
 
@@ -103,11 +105,11 @@ public class CommentService {
 
     @Transactional
     public void delete(Long userId, Long postId, Long commentId) {
-        Post post = postRepository.findById(postId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 포스트입니다.")
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId).orElseThrow(
+                () -> new PostNotFoundException("존재하지 않는 포스트입니다.")
         );
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
+        Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId).orElseThrow(
                 () -> new CommentNotFoundException("존재하지 않는 댓글입니다.")
         );
 
