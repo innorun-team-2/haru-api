@@ -8,6 +8,11 @@ security:
 spring:
   cloud:
     aws:
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: test-access-key
+        secret-key: test-secret-key
       s3:
         bucket: test-bucket
 
@@ -16,4 +21,4 @@ spring:
       ddl-auto: create-drop
 
 slack:
-  webhook-url: test-webhook-url
+  webhook-url: https://example.com/test-slack-webhook

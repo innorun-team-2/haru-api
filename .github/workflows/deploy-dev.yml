@@ -79,29 +79,75 @@ jobs:
 
           IMAGE_URI="${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPOSITORY }}"
 
-          echo "Deploying image: $IMAGE_URI:$SHORT_SHA"
+          echo "======================================"
+          echo "Deploying DEV"
+          echo "IMAGE: $IMAGE_URI:$SHORT_SHA"
+          echo "INSTANCE: ${{ vars.EC2_INSTANCE_ID }}"
+          echo "======================================"
 
           COMMAND_ID=$(aws ssm send-command \
             --region "${{ vars.AWS_REGION }}" \
             --instance-ids "${{ vars.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=[
+              "set -e",
+              "echo \"[1/5] ECR login\"",
               "aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com",
+              "echo \"[2/5] Docker pull\"",
               "docker pull '"$IMAGE_URI:$SHORT_SHA"'",
+              "echo \"[3/5] Stop old container\"",
               "docker stop haru-api || true",
+              "echo \"[4/5] Remove old container\"",
               "docker rm haru-api || true",
-              "docker run -d --name haru-api --restart unless-stopped -p 8080:8080 --env-file /home/ec2-user/haru-api/.env '"$IMAGE_URI:$SHORT_SHA"'"
+              "echo \"[5/5] Start new container\"",
+              "docker run -d --name haru-api --restart unless-stopped -p 8080:8080 --env-file /home/ec2-user/haru-api/.env '"$IMAGE_URI:$SHORT_SHA"'",
+              "echo \"Deployment command completed\"",
+              "docker ps --filter name=haru-api"
             ]' \
             --query "Command.CommandId" \
             --output text)
 
           echo "SSM Command ID: $COMMAND_ID"
 
-          # SSM 명령 완료까지 대기
+          echo "Waiting for SSM command..."
+
           aws ssm wait command-executed \
             --region "${{ vars.AWS_REGION }}" \
             --command-id "$COMMAND_ID" \
-            --instance-id "${{ vars.EC2_INSTANCE_ID }}"
+            --instance-id "${{ vars.EC2_INSTANCE_ID }}" \
+            || true
+
+          echo "======================================"
+          echo "SSM RESULT"
+          echo "======================================"
+
+          aws ssm get-command-invocation \
+            --region "${{ vars.AWS_REGION }}" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ vars.EC2_INSTANCE_ID }}" \
+            --query '{
+              Status: Status,
+              StatusDetails: StatusDetails,
+              StandardOutput: StandardOutputContent,
+              StandardError: StandardErrorContent
+            }' \
+            --output json
+
+          STATUS=$(aws ssm get-command-invocation \
+            --region "${{ vars.AWS_REGION }}" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ vars.EC2_INSTANCE_ID }}" \
+            --query "Status" \
+            --output text)
+
+          echo "Final SSM status: $STATUS"
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "❌ DEV deployment failed"
+            exit 1
+          fi
+
+          echo "✅ DEV deployment succeeded"
 
       # 10. 배포 결과 확인
       - name: Check deployment result
