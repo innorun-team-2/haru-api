@@ -79,10 +79,10 @@ class UserUpdateIntegrationTest {
                 "Before!"
         );
 
-        performUpdate(user, Map.of("nickname", "After!"))
+        performUpdate(user, Map.of("nickname", "After"))
                 .andExpect(status().isOk());
 
-        assertThat(user.getNickname()).isEqualTo("After!");
+        assertThat(user.getNickname()).isEqualTo("After");
         assertThat(passwordEncoder.matches(
                 "Password123!",
                 user.getPassword()

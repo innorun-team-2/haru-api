@@ -74,6 +74,12 @@ class SecurityConfigTest {
     }
 
     @Test
+    void getCurrentUserEndpointRequiresAuthentication() throws Exception {
+        mockMvc.perform(get("/api/users/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void deleteUserEndpointRequiresAuthentication() throws Exception {
         mockMvc.perform(delete("/api/users/me"))
                 .andExpect(status().isUnauthorized());

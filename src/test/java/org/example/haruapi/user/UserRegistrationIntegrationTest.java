@@ -125,7 +125,37 @@ class UserRegistrationIntegrationTest {
     }
 
     @Test
-    void rejectsNicknameWithoutRequiredCharacterTypes() throws Exception {
+    void registersNicknameWithoutSpecialCharacter() throws Exception {
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson(
+                                "member@example.com",
+                                "Password123!",
+                                "Haru"
+                        )))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true));
+
+        assertThat(userRepository.count()).isOne();
+    }
+
+    @Test
+    void rejectsNicknameWithoutEnglishCharacter() throws Exception {
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson(
+                                "member@example.com",
+                                "Password123!",
+                                "!!!"
+                        )))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"));
+
+        assertThat(userRepository.count()).isZero();
+    }
+
+    @Test
+    void rejectsNicknameContainingNumber() throws Exception {
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson(
