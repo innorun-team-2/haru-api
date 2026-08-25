@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.haruapi.global.s3.service.S3Service;
 import org.example.haruapi.image.entity.Image;
 import org.example.haruapi.image.repository.ImageRepository;
-import org.example.haruapi.post.dto.PostCreateRequestDto;
-import org.example.haruapi.post.dto.PostCreateResponseDto;
+import org.example.haruapi.post.dto.*;
 import org.example.haruapi.post.entity.Post;
 import org.example.haruapi.post.exception.ImageRequiredException;
+import org.example.haruapi.post.exception.PostNotFoundException;
 import org.example.haruapi.post.repository.PostRepository;
 import org.example.haruapi.user.entity.User;
 import org.example.haruapi.user.repository.UserRepository;
@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -56,5 +58,43 @@ public class PostService {
         imageRepository.save(imageEntity);
 
         return PostCreateResponseDto.from(savePost);
+    }
+
+    // 게시글 전체 조회
+    @Transactional(readOnly = true)
+    public List<PostGetAllResponseDto> getAll() {
+        // 코멘트 개수 조회 로직 필요 (나중에)
+
+        List<Post> posts = postRepository.findAllByDeletedAtIsNull();
+        return posts.stream()
+                .map(post -> {
+                    Image image = imageRepository.findByPost(post);
+                    return PostGetAllResponseDto.from(post, image);
+                }).toList();
+    }
+
+    // 게시글 상세 조회
+    @Transactional(readOnly = true)
+    public List<PostGetDetailResponseDto> getDetail(Long postId) {
+        // 포스트가 존재하는지
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+                .orElseThrow(() -> new PostNotFoundException("존재하지 않는 게시글입니다."));
+
+        // 포스트로 이미지 가져오기
+        Image image = imageRepository.findByPost(post);
+
+        return List.of(PostGetDetailResponseDto.from(post, image));
+    }
+
+    // 내 게시글 조회
+    @Transactional(readOnly = true)
+    public List<PostGetMyResponseDto> getMy(Long userId) {
+        List<Post> posts = postRepository.findAllByUserIdAndDeletedAtIsNull(userId);
+
+        return posts.stream()
+                .map(post -> {
+                    Image image = imageRepository.findByPost(post);
+                    return PostGetMyResponseDto.from(post, image);
+                }).toList();
     }
 }
