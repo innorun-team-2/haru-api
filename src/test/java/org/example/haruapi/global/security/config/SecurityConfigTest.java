@@ -4,6 +4,9 @@ import org.example.haruapi.global.security.handler.RestAccessDeniedHandler;
 import org.example.haruapi.global.security.handler.RestAuthenticationEntryPoint;
 import org.example.haruapi.global.security.jwt.JwtConfig;
 import org.example.haruapi.global.security.jwt.JwtTokenProvider;
+import org.example.haruapi.global.security.jwt.revocation.JwtRevocationValidator;
+import org.example.haruapi.global.security.jwt.revocation.RevokedAccessTokenRepository;
+import org.example.haruapi.global.security.jwt.revocation.TokenRevocationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 
@@ -34,6 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         SecurityConfig.class,
         JwtConfig.class,
         JwtTokenProvider.class,
+        JwtRevocationValidator.class,
+        TokenRevocationService.class,
         RestAuthenticationEntryPoint.class,
         RestAccessDeniedHandler.class,
         SecurityConfigTest.TestController.class
@@ -45,6 +51,9 @@ class SecurityConfigTest {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    private RevokedAccessTokenRepository revokedAccessTokenRepository;
 
     @Test
     void loginEndpointIsPublic() throws Exception {

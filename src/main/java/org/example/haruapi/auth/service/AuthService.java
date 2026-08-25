@@ -6,10 +6,12 @@ import org.example.haruapi.auth.dto.response.LoginResponse;
 import org.example.haruapi.auth.exception.InvalidCredentialsException;
 import org.example.haruapi.global.security.auth.HaruUserDetails;
 import org.example.haruapi.global.security.jwt.JwtTokenProvider;
+import org.example.haruapi.global.security.jwt.revocation.TokenRevocationService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,7 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenRevocationService tokenRevocationService;
 
     public LoginResponse login(LoginRequest request) {
         Authentication authentication;
@@ -47,6 +50,10 @@ public class AuthService {
                 accessToken.value(),
                 accessToken.expiresAt()
         );
+    }
+
+    public void logout(Jwt jwt) {
+        tokenRevocationService.revoke(jwt);
     }
 
     private String normalizeEmail(String email) {

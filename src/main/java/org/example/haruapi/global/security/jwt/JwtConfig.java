@@ -1,6 +1,7 @@
 package org.example.haruapi.global.security.jwt;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import org.example.haruapi.global.security.jwt.revocation.JwtRevocationValidator;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +52,8 @@ public class JwtConfig {
     @Bean
     public JwtDecoder jwtDecoder(
             SecretKey jwtSecretKey,
-            JwtProperties properties
+            JwtProperties properties,
+            JwtRevocationValidator jwtRevocationValidator
     ) {
         NimbusJwtDecoder decoder = NimbusJwtDecoder
                 .withSecretKey(jwtSecretKey)
@@ -59,7 +61,8 @@ public class JwtConfig {
                 .build();
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
                 JwtValidators.createDefaultWithIssuer(properties.issuer()),
-                new JwtAudienceValidator(properties.audience())
+                new JwtAudienceValidator(properties.audience()),
+                jwtRevocationValidator
         ));
         return decoder;
     }
