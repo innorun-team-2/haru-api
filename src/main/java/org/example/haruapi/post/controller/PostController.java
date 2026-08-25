@@ -5,6 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.haruapi.global.dto.ApiResponse;
 import org.example.haruapi.post.dto.*;
 import org.example.haruapi.post.service.PostService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -35,8 +39,11 @@ public class PostController {
 
     // 전체 게시글 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<PostGetAllResponseDto>> getAll() {
-        return ResponseEntity.ok(ApiResponse.success(postService.getAll()));
+    public ResponseEntity<ApiResponse<PostGetAllResponseDto>> getAll(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<PostGetAllResponseDto> postPage = postService.getAll(pageable);
+        return ResponseEntity.ok(ApiResponse.success(postPage.getContent()));
     }
 
     // 게시글 상세 조회
