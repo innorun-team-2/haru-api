@@ -58,4 +58,17 @@ public class CommentController {
                                 commentId,
                                 request)));
     }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long postId,
+            @PathVariable Long commentId
+    ) {
+        Long userId = Long.valueOf(jwt.getSubject());
+
+        commentService.delete(userId, postId, commentId);
+
+        return ResponseEntity.noContent().build();
+    }
 }

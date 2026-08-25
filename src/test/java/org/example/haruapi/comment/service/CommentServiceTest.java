@@ -180,4 +180,39 @@ class CommentServiceTest {
         verify(commentRepository).findById(commentId);
         verify(comment).update("수정된 댓글입니다.");
     }
+
+    @Test
+    void 댓글_삭제_성공() {
+        // given
+        Long userId = 1L;
+        Long postId = 1L;
+        Long commentId = 1L;
+
+        User user = mock(User.class);
+        Post post = mock(Post.class);
+        Comment comment = mock(Comment.class);
+
+        given(user.getId()).willReturn(userId);
+
+        given(postRepository.findById(postId))
+                .willReturn(Optional.of(post));
+
+        given(commentRepository.findById(commentId))
+                .willReturn(Optional.of(comment));
+
+        given(comment.getUser())
+                .willReturn(user);
+
+        // when
+        commentService.delete(
+                userId,
+                postId,
+                commentId
+        );
+
+        // then
+        verify(postRepository).findById(postId);
+        verify(commentRepository).findById(commentId);
+        verify(comment).updateDeletedAt();
+    }
 }

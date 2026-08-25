@@ -100,4 +100,22 @@ public class CommentService {
                 )
         );
     }
+
+    @Transactional
+    public void delete(Long userId, Long postId, Long commentId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 포스트입니다.")
+        );
+
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new CommentNotFoundException("존재하지 않는 댓글입니다.")
+        );
+
+        // 작성자가 맞는지 확인
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CommentAccessDeniedException("삭제 권한이 없습니다.");
+        }
+
+        comment.updateDeletedAt();
+    }
 }
