@@ -16,4 +16,5 @@ spring:
       s3:
         bucket: haru-s3-bucket
 
-
+  slack:
+    webhook-url: ${SLACK_WEBHOOK_URL}
