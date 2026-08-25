@@ -52,7 +52,7 @@ class CommentServiceTest {
         given(post.getId())
                 .willReturn(postId);
 
-        given(userRepository.findByIdAndDeletedAtIsNull(userId))
+        given(userRepository.findById(userId))
                 .willReturn(Optional.of(user));
 
         given(postRepository.findByIdAndDeletedAtIsNull(postId))
@@ -81,7 +81,7 @@ class CommentServiceTest {
         assertThat(result.get(0).getUserId())
                 .isEqualTo(userId);
 
-        verify(userRepository).findByIdAndDeletedAtIsNull(userId);
+        verify(userRepository).findById(userId);
         verify(postRepository).findByIdAndDeletedAtIsNull(postId);
         verify(commentRepository).save(any(Comment.class));
     }
