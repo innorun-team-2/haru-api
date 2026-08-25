@@ -52,10 +52,10 @@ class CommentServiceTest {
         given(post.getId())
                 .willReturn(postId);
 
-        given(userRepository.findById(userId))
+        given(userRepository.findByIdAndDeletedAtIsNull(userId))
                 .willReturn(Optional.of(user));
 
-        given(postRepository.findById(postId))
+        given(postRepository.findByIdAndDeletedAtIsNull(postId))
                 .willReturn(Optional.of(post));
 
         CommentCreateRequest request =
@@ -81,8 +81,8 @@ class CommentServiceTest {
         assertThat(result.get(0).getUserId())
                 .isEqualTo(userId);
 
-        verify(userRepository).findById(userId);
-        verify(postRepository).findById(postId);
+        verify(userRepository).findByIdAndDeletedAtIsNull(userId);
+        verify(postRepository).findByIdAndDeletedAtIsNull(postId);
         verify(commentRepository).save(any(Comment.class));
     }
 
@@ -100,7 +100,7 @@ class CommentServiceTest {
 
         Post post = mock(Post.class);
 
-        given(postRepository.findById(1L))
+        given(postRepository.findByIdAndDeletedAtIsNull(1L))
                 .willReturn(Optional.of(post));
 
         Comment comment1 = mock(Comment.class);
@@ -143,10 +143,10 @@ class CommentServiceTest {
         given(comment.getUser()).willReturn(user);
         given(comment.getContent()).willReturn("수정된 댓글입니다.");
 
-        given(postRepository.findById(postId))
+        given(postRepository.findByIdAndDeletedAtIsNull(postId))
                 .willReturn(Optional.of(post));
 
-        given(commentRepository.findById(commentId))
+        given(commentRepository.findByIdAndDeletedAtIsNull(commentId))
                 .willReturn(Optional.of(comment));
 
         CommentUpdateRequest request =
@@ -176,8 +176,8 @@ class CommentServiceTest {
         assertThat(result.get(0).getUserNickname())
                 .isEqualTo("테스트유저");
 
-        verify(postRepository).findById(postId);
-        verify(commentRepository).findById(commentId);
+        verify(postRepository).findByIdAndDeletedAtIsNull(postId);
+        verify(commentRepository).findByIdAndDeletedAtIsNull(commentId);
         verify(comment).update("수정된 댓글입니다.");
     }
 
@@ -194,10 +194,10 @@ class CommentServiceTest {
 
         given(user.getId()).willReturn(userId);
 
-        given(postRepository.findById(postId))
+        given(postRepository.findByIdAndDeletedAtIsNull(postId))
                 .willReturn(Optional.of(post));
 
-        given(commentRepository.findById(commentId))
+        given(commentRepository.findByIdAndDeletedAtIsNull(commentId))
                 .willReturn(Optional.of(comment));
 
         given(comment.getUser())
@@ -211,8 +211,8 @@ class CommentServiceTest {
         );
 
         // then
-        verify(postRepository).findById(postId);
-        verify(commentRepository).findById(commentId);
+        verify(postRepository).findByIdAndDeletedAtIsNull(postId);
+        verify(commentRepository).findByIdAndDeletedAtIsNull(commentId);
         verify(comment).updateDeletedAt();
     }
 }
