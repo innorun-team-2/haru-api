@@ -3,6 +3,7 @@ package org.example.haruapi.user.service;
 import lombok.RequiredArgsConstructor;
 import org.example.haruapi.user.dto.request.UserRegisterRequest;
 import org.example.haruapi.user.dto.request.UserUpdateRequest;
+import org.example.haruapi.user.dto.response.UserInfoResponse;
 import org.example.haruapi.user.dto.response.UserRegisterResponse;
 import org.example.haruapi.user.entity.User;
 import org.example.haruapi.user.exception.DuplicateEmailException;
@@ -46,6 +47,13 @@ public class UserService {
             }
             throw new DuplicateEmailException();
         }
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoResponse getCurrentUser(Long userId) {
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(UserNotFoundException::new);
+        return UserInfoResponse.from(user);
     }
 
     @Transactional

@@ -7,7 +7,7 @@ public final class UserValidationRules {
                     + "[A-Za-z\\d\\p{Punct}]+$";
 
     public static final String NICKNAME_PATTERN =
-            "^(?=.*[A-Za-z])(?=.*\\p{Punct})[A-Za-z\\p{Punct}]+$";
+            "^(?=.*[A-Za-z])[A-Za-z\\p{Punct}]+$";
 
     private UserValidationRules() {
     }

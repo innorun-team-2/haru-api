@@ -22,7 +22,7 @@ public record UserUpdateRequest(
         @Size(max = 10, message = "닉네임은 10자 이내로 입력해주세요.")
         @Pattern(
                 regexp = NICKNAME_PATTERN,
-                message = "닉네임은 영문과 특수문자를 각각 포함해야 합니다."
+                message = "닉네임은 영문을 반드시 포함하고, 영문과 특수문자만 사용할 수 있습니다."
         )
         String nickname
 ) {
