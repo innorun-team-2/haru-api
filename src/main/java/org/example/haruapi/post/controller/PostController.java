@@ -52,4 +52,16 @@ public class PostController {
 
         return ResponseEntity.ok(ApiResponse.success(postService.getMy(userId)));
     }
+
+    // 게시글 수정
+    @PutMapping("/{postId}")
+    public ResponseEntity<ApiResponse<PostUpdateResponseDto>> update(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long postId,
+            @RequestBody PostUpdateRequestDto request
+    ) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        return ResponseEntity.ok(ApiResponse.success(postService.update(userId, postId, request)));
+    }
+
 }

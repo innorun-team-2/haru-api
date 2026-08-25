@@ -7,6 +7,7 @@ import org.example.haruapi.image.repository.ImageRepository;
 import org.example.haruapi.post.dto.*;
 import org.example.haruapi.post.entity.Post;
 import org.example.haruapi.post.exception.ImageRequiredException;
+import org.example.haruapi.post.exception.PostForbiddenException;
 import org.example.haruapi.post.exception.PostNotFoundException;
 import org.example.haruapi.post.repository.PostRepository;
 import org.example.haruapi.user.entity.User;
@@ -17,6 +18,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -96,5 +98,19 @@ public class PostService {
                     Image image = imageRepository.findByPost(post);
                     return PostGetMyResponseDto.from(post, image);
                 }).toList();
+    }
+
+    // 게시글 수정
+    public List<PostUpdateResponseDto> update(Long userId, Long postId, PostUpdateRequestDto request) {
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+                .orElseThrow(() -> new PostNotFoundException("존재하지 않는 게시글입니다."));
+
+        // 권한 검증 (NPE 방지)
+        if (post.getUser() == null || !Objects.equals(post.getUser().getId(), userId)) {
+            throw new PostForbiddenException("게시글 수정 권한이 없습니다.");
+        }
+
+        post.update(request.getTitle(), request.getContent());
+        return List.of(PostUpdateResponseDto.from(post));
     }
 }
