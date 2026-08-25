@@ -61,7 +61,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<ApiResponse<Void>> delete(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long postId,
             @PathVariable Long commentId
@@ -70,6 +70,6 @@ public class CommentController {
 
         commentService.delete(userId, postId, commentId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
