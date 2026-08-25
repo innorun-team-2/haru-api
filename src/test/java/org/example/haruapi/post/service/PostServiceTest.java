@@ -1,5 +1,6 @@
 package org.example.haruapi.post.service;
 
+import org.example.haruapi.comment.repository.CommentRepository;
 import org.example.haruapi.image.entity.Image;
 import org.example.haruapi.image.repository.ImageRepository;
 import org.example.haruapi.post.dto.*;
@@ -13,6 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,14 +37,20 @@ class PostServiceTest {
     @Mock
     private ImageRepository imageRepository;
 
+    @Mock
+    private CommentRepository commentRepository;
+
     @InjectMocks
     private PostService postService;
 
     @Test
     void 게시글_전체_조회가_성공한다() {
         // given
+        Pageable pageable = PageRequest.of(0, 10);
+
         User user = User.create("test@test.com", "password", "닉네임");
         User user2 = User.create("test@test.com2", "password2", "닉네임2");
+
         Post post = Post.builder()
                 .title("전체조회 제목")
                 .content("내용")
@@ -50,6 +62,10 @@ class PostServiceTest {
                 .user(user2)
                 .build();
 
+        // map 변환 로직을 위해 엔티티에 id값 세팅
+        ReflectionTestUtils.setField(post, "id", 1L);
+        ReflectionTestUtils.setField(post2, "id", 2L);
+
         Image image = Image.builder()
                 .path("image.jpg")
                 .post(post)
@@ -60,17 +76,25 @@ class PostServiceTest {
                 .post(post2)
                 .build();
 
-        given(postRepository.findAllByDeletedAtIsNull()).willReturn(List.of(post, post2));
+        Page<Post> postPage = new PageImpl<>(List.of(post, post2), pageable, 2);
 
-        given(imageRepository.findByPost(post)).willReturn(image);
-        given(imageRepository.findByPost(post2)).willReturn(image2);
+        given(postRepository.findAllByDeletedAtIsNull(pageable)).willReturn(postPage);
+        given(imageRepository.findByPostIdIn(List.of(1L, 2L))).willReturn(List.of(image, image2));
+
+        Object[] commentCount1 = new Object[]{1L, 5L}; // 1번 게시글의 댓글 5개
+        Object[] commentCount2 = new Object[]{2L, 0L}; // 2번 게시글의 댓글 0개
+        given(commentRepository.countByPostIdIn(List.of(1L, 2L))).willReturn(List.of(commentCount1, commentCount2));
 
         // when
-        List<PostGetAllResponseDto> result = postService.getAll();
+        Page<PostGetAllResponseDto> result = postService.getAll(pageable);
 
         // then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getTitle()).isEqualTo("전체조회 제목");
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getTotalElements()).isEqualTo(2);
+
+        PostGetAllResponseDto firstDto = result.getContent().get(0);
+        assertThat(firstDto.getTitle()).isEqualTo("전체조회 제목");
+        assertThat(firstDto.getCommentCount()).isEqualTo(5L);
     }
 
     @Test
