@@ -113,4 +113,17 @@ public class PostService {
         post.update(request.getTitle(), request.getContent());
         return List.of(PostUpdateResponseDto.from(post));
     }
+
+    // 게시글 삭제
+    public void delete(Long userId, Long postId) {
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+                .orElseThrow(() -> new PostNotFoundException("존재하지 않는 게시글입니다."));
+
+        // 권한 검증 (NPE 방지)
+        if (post.getUser() == null || !Objects.equals(post.getUser().getId(), userId)) {
+            throw new PostForbiddenException("게시글 삭제 권한이 없습니다.");
+        }
+
+        post.delete();
+    }
 }

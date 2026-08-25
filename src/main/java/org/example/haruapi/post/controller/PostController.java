@@ -64,4 +64,15 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(postService.update(userId, postId, request)));
     }
 
+    // 게시글 삭제
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long postId
+    ) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        postService.delete(userId, postId);
+
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }
