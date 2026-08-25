@@ -1,4 +1,4 @@
-name: DEV Deploy
+name: Deploy DEV
 
 on:
   push:
@@ -16,8 +16,8 @@ jobs:
     environment: dev
 
     steps:
-      # 1. Checkout
-      - name: Checkout code
+      # 1. 코드 가져오기
+      - name: Checkout
         uses: actions/checkout@v6
 
       # 2. Java 21
@@ -28,38 +28,40 @@ jobs:
           distribution: 'corretto'
           cache: gradle
 
-      # 3. Test
-      - name: Run tests
-        run: ./gradlew test
-
-      # 4. Build JAR
-      - name: Build JAR
-        run: ./gradlew bootJar
-
-      # 5. AWS OIDC 인증
+      # 3. AWS OIDC 인증
+      # 테스트에서 Spring Cloud AWS의 S3Template을 생성할 때
+      # AWS 자격 증명이 필요하기 때문에 Test보다 먼저 실행
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      # 6. AWS 인증 확인
+      # 4. AWS 인증 확인
       - name: Check AWS identity
-        run: aws sts get-caller-identity
+        run: |
+          aws sts get-caller-identity
+
+      # 5. 테스트
+      - name: Test
+        run: ./gradlew test
+
+      # 6. JAR 빌드
+      - name: Build JAR
+        run: ./gradlew bootJar
 
       # 7. ECR 로그인
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 8. Docker Build & Push
-      - name: Build and push Docker image
+      # 8. Docker 이미지 빌드 및 Push
+      - name: Build and Push Docker Image
         run: |
-          SHORT_SHA=${GITHUB_SHA::7}
+          SHORT_SHA="${GITHUB_SHA::7}"
 
-          IMAGE_URI=${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPOSITORY }}
+          IMAGE_URI="${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPOSITORY }}"
 
-          echo "Building image:"
-          echo "$IMAGE_URI:$SHORT_SHA"
+          echo "Building image: $IMAGE_URI:$SHORT_SHA"
 
           docker build \
             --platform linux/arm64 \
@@ -68,52 +70,53 @@ jobs:
 
           docker push "$IMAGE_URI:$SHORT_SHA"
 
-          echo "Pushed:"
-          echo "$IMAGE_URI:$SHORT_SHA"
+          echo "Pushed: $IMAGE_URI:$SHORT_SHA"
 
       # 9. DEV EC2 배포
       - name: Deploy to DEV EC2
-        id: deploy
         run: |
-          SHORT_SHA=${GITHUB_SHA::7}
+          SHORT_SHA="${GITHUB_SHA::7}"
 
-          IMAGE_URI=${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPOSITORY }}
+          IMAGE_URI="${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPOSITORY }}"
 
-          echo "Deploying:"
-          echo "$IMAGE_URI:$SHORT_SHA"
+          echo "Deploying image: $IMAGE_URI:$SHORT_SHA"
 
           COMMAND_ID=$(aws ssm send-command \
             --region "${{ vars.AWS_REGION }}" \
             --instance-ids "${{ vars.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters commands="[
-              \"aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com\",
-              \"docker pull $IMAGE_URI:$SHORT_SHA\",
-              \"docker stop haru-api || true\",
-              \"docker rm haru-api || true\",
-              \"docker run -d --name haru-api --restart unless-stopped -p 8080:8080 --env-file /home/ec2-user/haru-api/.env $IMAGE_URI:$SHORT_SHA\"
-            ]" \
+            --parameters 'commands=[
+              "aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com",
+              "docker pull '"$IMAGE_URI:$SHORT_SHA"'",
+              "docker stop haru-api || true",
+              "docker rm haru-api || true",
+              "docker run -d --name haru-api --restart unless-stopped -p 8080:8080 --env-file /home/ec2-user/haru-api/.env '"$IMAGE_URI:$SHORT_SHA"'"
+            ]' \
             --query "Command.CommandId" \
             --output text)
 
           echo "SSM Command ID: $COMMAND_ID"
 
-          echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
-
-      # 10. SSM 배포 완료 대기
-      - name: Wait for deployment
-        run: |
-          echo "Waiting for EC2 deployment..."
-
+          # SSM 명령 완료까지 대기
           aws ssm wait command-executed \
             --region "${{ vars.AWS_REGION }}" \
-            --command-id "${{ steps.deploy.outputs.command_id }}" \
+            --command-id "$COMMAND_ID" \
             --instance-id "${{ vars.EC2_INSTANCE_ID }}"
 
-      # 11. 배포 결과 확인
+      # 10. 배포 결과 확인
       - name: Check deployment result
         run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+
+          echo "Checking deployment..."
+
+          COMMAND_ID=$(aws ssm list-commands \
+            --region "${{ vars.AWS_REGION }}" \
+            --instance-id "${{ vars.EC2_INSTANCE_ID }}" \
+            --query "Commands[0].CommandId" \
+            --output text)
+
           aws ssm get-command-invocation \
             --region "${{ vars.AWS_REGION }}" \
-            --command-id "${{ steps.deploy.outputs.command_id }}" \
+            --command-id "$COMMAND_ID" \
             --instance-id "${{ vars.EC2_INSTANCE_ID }}"
