@@ -29,7 +29,7 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostCreateResponseDto>> create(
             @AuthenticationPrincipal Jwt jwt,
             @RequestPart(value = "requestDto") @Valid PostCreateRequestDto requestDto,
-            @RequestPart(value = "image") MultipartFile image
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         Long userId = Long.valueOf(jwt.getSubject());
         PostCreateResponseDto responseDto = postService.create(userId, requestDto, image);
