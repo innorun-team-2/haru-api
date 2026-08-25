@@ -7,25 +7,19 @@ import org.example.haruapi.global.security.jwt.JwtTokenProvider;
 import org.example.haruapi.global.security.jwt.revocation.JwtRevocationValidator;
 import org.example.haruapi.global.security.jwt.revocation.RevokedAccessTokenRepository;
 import org.example.haruapi.global.security.jwt.revocation.TokenRevocationService;
+import org.example.haruapi.global.service.SlackNotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -54,6 +48,11 @@ class SecurityConfigTest {
 
     @MockitoBean
     private RevokedAccessTokenRepository revokedAccessTokenRepository;
+
+    // SlackNotificationService를 Mock으로 등록
+    // @WebMvcTest에서는 실제 SlackNotificationService를 로딩하지 않기 때문에 필요
+    @MockitoBean
+    private SlackNotificationService slackNotificationService;
 
     @Test
     void loginEndpointIsPublic() throws Exception {

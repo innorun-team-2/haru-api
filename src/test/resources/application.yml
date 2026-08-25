@@ -1,0 +1,19 @@
+security:
+  jwt:
+    issuer: haru-api
+    audience: haru-client
+    access-token-ttl: 15m
+    secret-key: VGhpcy1pcy1hLXRlc3Qta2V5LXRoYXQtaXMtYXQtbGVhc3QtMzItYnl0ZXM=
+
+spring:
+  cloud:
+    aws:
+      s3:
+        bucket: test-bucket
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+slack:
+  webhook-url: test-webhook-url
