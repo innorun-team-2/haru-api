@@ -1,4 +1,4 @@
-name: AWS DEV OIDC Test
+name: AWS DEV ECR Test
 
 on:
   workflow_dispatch:
@@ -14,6 +14,9 @@ jobs:
     environment: dev
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -21,4 +24,29 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Check AWS identity
-        run: aws sts get-caller-identity
+        run: |
+          aws sts get-caller-identity
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --platform linux/arm64 \
+            -t ${{ vars.ECR_REPOSITORY }}:test \
+            .
+
+      - name: Tag Docker image
+        run: |
+          IMAGE_URI=${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPOSITORY }}
+
+          docker tag \
+            ${{ vars.ECR_REPOSITORY }}:test \
+            $IMAGE_URI:test
+
+      - name: Push Docker image
+        run: |
+          IMAGE_URI=${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPOSITORY }}
+
+          docker push $IMAGE_URI:test
