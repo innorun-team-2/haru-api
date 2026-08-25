@@ -80,6 +80,6 @@ public class PostController {
         Long userId = Long.valueOf(jwt.getSubject());
         postService.delete(userId, postId);
 
-        return ResponseEntity.ok(ApiResponse.success(null));
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
