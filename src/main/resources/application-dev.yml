@@ -12,3 +12,6 @@ spring:
     aws:
       s3:
         bucket: ${AWS_S3_BUCKET}
+
+  slack:
+    webhook-url: ${SLACK_WEBHOOK_URL}
