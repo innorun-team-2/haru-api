@@ -12,6 +12,7 @@ import org.example.haruapi.post.exception.PostForbiddenException;
 import org.example.haruapi.post.exception.PostNotFoundException;
 import org.example.haruapi.post.repository.PostRepository;
 import org.example.haruapi.user.entity.User;
+import org.example.haruapi.user.exception.UserNotFoundException;
 import org.example.haruapi.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -39,12 +40,11 @@ public class PostService {
 
     // 게시글 생성
     public PostCreateResponseDto create(Long userId, PostCreateRequestDto requestDto, MultipartFile image) {
-        // 유저 조회 검증 로직 (수정 예정)
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new UserNotFoundException());
 
-        // 이미지가 비어있다면 예외 처리
-        if (ObjectUtils.isEmpty(image)) {
+        // 이미지가 null이거나 0바이트인지 검증
+        if (image == null || image.isEmpty()) {
             throw new ImageRequiredException("게시글 생성시 이미지 첨부는 필수입니다.");
         }
 
